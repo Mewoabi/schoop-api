@@ -3,15 +3,34 @@ import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Student } from './entities/student.entity';
+import { createReadStream } from 'fs';
+import { instructor } from '@prisma/client';
+import { StudentWithSupervisor } from './entities/student-with-supervisor.entity';
 
 @Injectable()
 export class StudentService {
   constructor(private prisma: PrismaService){}
 
   async create(createStudentDto: CreateStudentDto): Promise<Student> {
+    const {courseIds, departmentId,supervisorId, ...simpleStudentFields} = createStudentDto
     try {
       return await this.prisma.student.create({
-        data: createStudentDto
+        data: {
+          ...simpleStudentFields, 
+          supervisor: {
+            connect: {
+              id: supervisorId
+            }
+          }, 
+          department: {
+            connect: {
+              id: departmentId
+            }
+          }, 
+          courses: {
+            connect: courseIds.map(courseId =>( {id: courseId} ))
+          }
+        }
       })
     } catch (error) {
       console.log(error)
@@ -60,6 +79,19 @@ export class StudentService {
     } catch (error) {
       console.log(error)
       throw new BadRequestException("error removing student", error.message)
+    }
+  }
+
+  async getstudentWithSupervisor (id: string): Promise<StudentWithSupervisor> {
+    try {
+      const studentWithSupervisor = await this.prisma.student.findUnique({
+        where: {id}, 
+        include: {supervisor: true}
+      })
+      return studentWithSupervisor
+    } catch (error) {
+      console.log(error); 
+      throw new BadRequestException("error getting supervisor for student with that id", error.message)
     }
   }
 }

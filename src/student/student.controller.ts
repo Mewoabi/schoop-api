@@ -33,4 +33,9 @@ export class StudentController {
   remove(@Param('id') id: string) {
     return this.studentService.remove(id);
   }
+
+  @Get('supervisor/:id')
+  getStudentWithSupervisor(@Param('id') id: string){
+    return this.studentService.getstudentWithSupervisor(id)
+  }
 }

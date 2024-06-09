@@ -10,9 +10,15 @@ export class ClassroomService {
   constructor (private prisma: PrismaService){}
 
   async create(createClassroomDto: CreateClassroomDto): Promise<Classroom> {
+    const {courseIds, ...otherClassroomProps} = createClassroomDto
      try {
         return await this.prisma.classroom.create({
-        data: createClassroomDto
+        data: {
+          ...otherClassroomProps, 
+          courses: {
+            connect: courseIds.map(courseId => ({id: courseId}))
+          }
+        }
        })
      } catch (error) {
       console.log(error)

@@ -8,5 +8,5 @@ export class Course implements course{
     departmentId: string;
     studentIds: string[];
     prereq_ids: string[];
-    classroomIds: string[];
+    classroomIds: string[]; 
 }

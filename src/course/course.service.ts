@@ -6,21 +6,38 @@ import { course } from '@prisma/client';
 
 @Injectable()
 export class CourseService {
-  constructor(private prisma: PrismaService){}
+  constructor(private prisma: PrismaService) { }
 
   async create(createCourseDto: CreateCourseDto): Promise<course> {
-   try {
-     return await this.prisma.course.create({
-      data: createCourseDto
-     })
-   } catch (error) {
-    console.log(error);
-    throw new BadRequestException("error creating course", error.message)
-   }
+    const { classroomIds, departmentId, instructorId, prereq_ids, studentIds,...otherCourseFields } = createCourseDto
+    try {
+      return await this.prisma.course.create({
+        data: {
+          ...otherCourseFields, 
+          classrooms: {
+            connect: classroomIds.map(classroomId => ({id: classroomId}))
+          }, 
+          department: {
+            connect: {id: departmentId}
+          }, 
+          instructor: {
+            connect: {id: instructorId}
+          }, 
+          prerequisites: {
+            connect: prereq_ids.map(prereq_id => ({id: prereq_id}))
+          }, 
+          students: {
+            connect: studentIds.map(studentId => ({id: studentId}))
+          }
+        }
+      })
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException("error creating course", error.message)
+    }
   }
 
-  async findAll(): Promise<course[]>
- {
+  async findAll(): Promise<course[]> {
     try {
       return await this.prisma.course.findMany()
     } catch (error) {
@@ -32,7 +49,7 @@ export class CourseService {
   async findOne(id: string): Promise<course> {
     try {
       return await this.prisma.course.findUnique({
-        where: {id}
+        where: { id }
       });
     } catch (error) {
       console.log(error)
@@ -43,7 +60,7 @@ export class CourseService {
   async update(id: string, updateCourseDto: UpdateCourseDto): Promise<course> {
     try {
       return await this.prisma.course.update({
-        where: {id}, 
+        where: { id },
         data: updateCourseDto
       })
     } catch (error) {
@@ -55,7 +72,7 @@ export class CourseService {
   async remove(id: string) {
     try {
       return await this.prisma.course.delete({
-        where: {id}
+        where: { id }
       })
     } catch (error) {
       console.log(error)

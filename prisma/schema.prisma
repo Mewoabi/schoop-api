@@ -69,7 +69,7 @@ model classroom {
   room_num  String?
   capacity  Int
   courses   course[] @relation(fields: [courseIds], references: [id])
-  courseIds String[] @db.ObjectId
+  courseIds String[]@db.ObjectId
   //the condition to make sure that no two classrooms have same building and same room_number 
   @@unique([building, room_num])
 }
@@ -84,9 +84,9 @@ model course {
   departmentId  String      @db.ObjectId
   students      student[]   @relation(fields: [studentIds], references: [id])
   studentIds    String[]    @db.ObjectId
-  prerequisite  course     @relation("PrerequisiteCourse", fields: [prereq_ids], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  prereq_ids     String[]     @unique @db.ObjectId
-  prerequisites course[]    @relation("PrerequisiteCourse")
+  prerequisite  course?     @relation("Prerequisites", fields: [prereq_ids], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  prereq_ids     String[]  @db.ObjectId
+  prerequisites course[]    @relation("Prerequisites")
   classrooms    classroom[] @relation(fields: [classroomIds], references: [id])
   classroomIds  String[]    @db.ObjectId
 }

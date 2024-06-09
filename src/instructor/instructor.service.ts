@@ -9,9 +9,17 @@ export class InstructorService {
   constructor(private prisma: PrismaService){}
 
   async create(createInstructorDto: CreateInstructorDto): Promise<instructor> {
+    const {departmentId, ...otherInstructorFeilds} = createInstructorDto
     try {
       return await this.prisma.instructor.create({
-        data: createInstructorDto
+        data: {
+          ...otherInstructorFeilds, 
+          department: {
+            connect: {
+              id: departmentId
+            }
+          }
+        }
       })
     } catch (error) {
       console.log(error)
