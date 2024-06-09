@@ -1,0 +1,92 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model student {
+  id           String      @id @default(auto()) @map("_id") @db.ObjectId
+  department   department? @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+  departmentId String      @db.ObjectId
+  name         String
+  tot_credits  Int
+  courses      course[]    @relation(fields: [courseIds], references: [id])
+  courseIds    String[]    @db.ObjectId
+  supervisor   instructor? @relation(fields: [supervisorId], references: [id])
+  supervisorId String?      @db.ObjectId
+}
+
+model instructor {
+  id                 String      @id @default(auto()) @map("_id") @db.ObjectId
+  name               String
+  sex                Sex
+  courses            course[]
+  salary             Int
+  department         department? @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+  departmentId       String?      @db.ObjectId
+  supervisedStudents student[]
+}
+
+model department {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  instructors instructor[]
+  students    student[]
+  courses     course[]
+  budjet      Int
+  building    Building
+}
+
+enum Sex {
+  male
+  female
+}
+
+enum Building {
+  classroom_block_A
+  classroom_block_B
+  u_Block
+  g_Block
+  amphi_1000
+  amphi_500_A
+  amphi_500_B
+  restau_block
+  open_amphi
+  science_block
+  arts_block
+  fet_block
+}
+
+model classroom {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  building  Building
+  room_num  String?
+  capacity  Int
+  courses   course[] @relation(fields: [courseIds], references: [id])
+  courseIds String[] @db.ObjectId
+  //the condition to make sure that no two classrooms have same building and same room_number 
+  @@unique([building, room_num])
+}
+
+model course {
+  id            String      @id @default(auto()) @map("_id") @db.ObjectId
+  title         String
+  credits       Int
+  instructor    instructor  @relation(fields: [instructorId], references: [id])
+  instructorId  String      @db.ObjectId
+  department    department  @relation(fields: [departmentId], references: [id])
+  departmentId  String      @db.ObjectId
+  students      student[]   @relation(fields: [studentIds], references: [id])
+  studentIds    String[]    @db.ObjectId
+  prerequisite  course     @relation("PrerequisiteCourse", fields: [prereq_ids], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  prereq_ids     String[]     @unique @db.ObjectId
+  prerequisites course[]    @relation("PrerequisiteCourse")
+  classrooms    classroom[] @relation(fields: [classroomIds], references: [id])
+  classroomIds  String[]    @db.ObjectId
+}
