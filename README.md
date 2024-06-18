@@ -1,5 +1,11 @@
 Project Description: 
-
+Nest.js backend api with prisma ORM for managing connections and interactions with a mongodb database. 
+The main resources (entities) here are students, intructor, course, department, classroom
+A student has a supervisor(instructor) and can take many courses 
+Each course has prerequisites (course) and is taught by an instructor in one or many classrooms 
+Each classroom has a building, capacity, and room number 
+Each teacher belongs to a department and has a salary
+A department has a budjet and building, as well as courses pertaining to it.
 ## Description
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
